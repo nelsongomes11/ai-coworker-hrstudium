@@ -1,0 +1,8 @@
+# Ignore venv
+
+myenv/
+
+# Ignore env variables
+
+.env
+
