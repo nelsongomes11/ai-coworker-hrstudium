@@ -210,9 +210,9 @@ def chat_page():
 
             -Confirm the request with the user.
 
-        - Today's date ({datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')})
+        - Verify all dates against today's date ({datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')})
 
-
+        - Here are the dates and weekdays of the current year: {str(dates_dict)}
 
 
         Current booking info is: {st.session_state.extracted_info}
@@ -334,7 +334,7 @@ def chat_page():
 
 
             print(model_messages)
-
+            
             st.rerun()
 
             
