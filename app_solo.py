@@ -303,7 +303,7 @@ def chat_page():
                 You are an assistant that extracts structured vacation request information 
                 from a chat between a user and a HR assistant.
 
-                Only return structured data if the user clearly confirmed their request.
+                Only return structured data if the user clearly confirmed their request and didn't ask for any changes.
                 
                 Chat history:
                 {json.dumps(st.session_state["messages"], indent=2)}
