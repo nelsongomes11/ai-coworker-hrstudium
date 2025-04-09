@@ -8,8 +8,7 @@ def extract_dates(dates:list) -> dict:
     Extract dates with weekday from a list of dates.
     Only use this tool if the user request any dates or anything that mentions dates.
     Only use this if you don't have the weekdays for certain dates.
-    If you don't need to get any dates from the user don't use this.
-
+    
     Args:
         dates (list): A list of date strings in the format YYYY-MM-DD.
     Returns:
