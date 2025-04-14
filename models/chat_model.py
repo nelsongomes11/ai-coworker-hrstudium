@@ -18,7 +18,11 @@ import requests
 from datetime import datetime
 
 
-from tools.extract_dates import extract_dates
+from tools.extract_dates import verify_and_extract_dates
+from tools.add_request import add_request
+
+
+
 
 
 def get_chat_model(bearer_token,user_input):
@@ -38,7 +42,7 @@ def get_chat_model(bearer_token,user_input):
         ]
     
     llm=ChatOpenAI(model="gpt-4o-mini")
-    llm_with_tools=llm.bind_tools([extract_dates])
+    llm_with_tools=llm.bind_tools([verify_and_extract_dates,add_request])
 
     history = StreamlitChatMessageHistory(key="messages")
 
@@ -64,23 +68,29 @@ def get_chat_model(bearer_token,user_input):
 
 
     history.add_user_message(user_input)
-    history.add_ai_message(first_response.content)
+    if first_response.content:
+        history.add_ai_message(first_response.content)
 
     if first_response.tool_calls:
         print("Used tools!")
         for tool_call in first_response.tool_calls:
+
             tool_name=tool_call["name"]
 
-            if tool_name=="extract_dates":
+
+            if tool_name=="verify_and_extract_dates":
                 
-                tool_result=extract_dates.invoke(tool_call["args"])
+                tool_args = tool_call["args"]
+                tool_args["bearer_token"] = bearer_token
+                print(f"Invoking {tool_name} with args: {tool_args}")
+                tool_result = verify_and_extract_dates.invoke(tool_args)
 
                 print(f"Tool used : {tool_name}; Result: {tool_result}")
 
             
 
                 second_response = chain.invoke({
-                        "input": f"Aqui estão os dados extraídos: {tool_result} com a tool {tool_name}",
+                        "input": f"Os dias disponíveis são: {tool_result}. Por favor confirme se deseja prosseguir com o agendamento.",
                         "filtered_absence_types": f"{filtered_absence_types}",
                         "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
                         "history": history.messages,
@@ -88,8 +98,32 @@ def get_chat_model(bearer_token,user_input):
                     })
 
                 history.add_ai_message(second_response.content)
-                print(second_response.content)
+                print(second_response)
                 return second_response.content
+            
+            elif tool_name=="add_request":
+
+                tool_args = tool_call["args"]
+                tool_args["bearer_token"] = bearer_token
+                print(f"Invoking {tool_name} with args: {tool_args}")
+                tool_result = add_request.invoke(tool_args)
+
+                print(f"Tool used : {tool_name}; Result: {tool_result}")
+
+                second_response = chain.invoke({
+                        "input": f"A mensagem ao submeter pedido foi : {tool_result}.",
+                        "filtered_absence_types": f"{filtered_absence_types}",
+                        "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
+                        "history": history.messages,
+                    
+                    })
+
+                history.add_ai_message(second_response.content)
+                print(second_response)
+                return second_response.content
+            
+
+
 
         return "Não consegui processar os resultados da tool"
            
