@@ -25,7 +25,7 @@ from tools.add_request import add_request
 
 
 
-def get_chat_model(bearer_token,user_input):
+def get_chat_model(bearer_token,user_input,uploaded_files):
 
     absence_types=requests.get('https://api-dev.hrstudium.pt/vacations/absences/types',
             headers={
@@ -37,7 +37,7 @@ def get_chat_model(bearer_token,user_input):
     absence_types=absence_types.json() 
 
     filtered_absence_types = [
-            {"id": item["id"], "description": item["description"], "active": item["active"]}
+            {"id": item["id"], "description": item["description"], "active": item["active"],"documento_obrigatorio": item["documento_obrigatorio"]}
             for item in absence_types if item.get("active") == 1
         ]
     
@@ -56,12 +56,13 @@ def get_chat_model(bearer_token,user_input):
 
     
 
-    chain=  {"input": itemgetter("input"),"filtered_absence_types":itemgetter("filtered_absence_types"),"date": itemgetter("date"),"history": itemgetter("history"),}  | chat_prompt | llm_with_tools
+    chain=  {"input": itemgetter("input"),"filtered_absence_types":itemgetter("filtered_absence_types"),"date": itemgetter("date"),"uploaded_files":itemgetter("uploaded_files"),"history": itemgetter("history"),}  | chat_prompt | llm_with_tools
 
     
     first_response=chain.invoke({"input":user_input,
                   "filtered_absence_types": f"{filtered_absence_types}",
                   "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
+                  "uploaded_files": f"{uploaded_files}",
                   "history": history.messages
                 })
     
@@ -93,6 +94,7 @@ def get_chat_model(bearer_token,user_input):
                         "input": f"Os dias disponíveis são: {tool_result}. Por favor confirme se deseja prosseguir com o agendamento.",
                         "filtered_absence_types": f"{filtered_absence_types}",
                         "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
+                        "uploaded_files": f"{uploaded_files}",
                         "history": history.messages,
                     
                     })
@@ -114,6 +116,7 @@ def get_chat_model(bearer_token,user_input):
                         "input": f"A mensagem ao submeter pedido foi : {tool_result}.",
                         "filtered_absence_types": f"{filtered_absence_types}",
                         "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
+                        "uploaded_files": f"{uploaded_files}",
                         "history": history.messages,
                     
                     })

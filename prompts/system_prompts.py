@@ -17,7 +17,11 @@ coworker_system_prompt= '''
 
             3-If it's an absence, ask for the specific type from {filtered_absence_types}, use the description and show all types.
 
+                - If it's an absence, the files uploaded are {uploaded_files} and the user should be informed that they are needed for some of the absence types.
+
             4-If it is for vacation, don't ask anything related to absence.
+
+            5- The user can only request either vacation or absence days, not both at the same time.
 
             5-Check for conflicts using the `verify_and_extract_dates` tool:
 
