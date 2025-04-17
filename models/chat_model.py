@@ -107,6 +107,8 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
 
                 tool_args = tool_call["args"]
                 tool_args["bearer_token"] = bearer_token
+                tool_args["files"] = uploaded_files
+
                 print(f"Invoking {tool_name} with args: {tool_args}")
                 tool_result = add_request.invoke(tool_args)
 

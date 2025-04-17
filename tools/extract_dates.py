@@ -20,6 +20,32 @@ def verify_and_extract_dates(dates: list, bearer_token: str) -> dict:
               and a list of removed dates with the reasons for removal.
     """
 
+    # Fetch User Info
+
+    
+    response=requests.get(
+        "https://api-dev.hrstudium.pt/users",
+        headers={"company": "dev", "Authorization": "Bearer " + bearer_token}
+    )
+    if response.status_code == 200:
+        user_basic_data = response.json()
+        user_id = user_basic_data["id"]
+    else:
+        print("Failed to fetch basic user data:", response.status_code)
+        
+
+    response=requests.get(
+        "https://api-dev.hrstudium.pt/users/info/" + str(user_id),
+        headers={"company": "dev", "Authorization": "Bearer " + bearer_token}
+    )
+    if response.status_code == 200:
+        user_data= response.json()
+    else:
+        print("Failed to fetch user data:", response.status_code)
+
+
+
+
     # Fetch holidays
     holiday_dates = []
     response = requests.get(
@@ -27,7 +53,13 @@ def verify_and_extract_dates(dates: list, bearer_token: str) -> dict:
         headers={"company": "dev", "Authorization": "Bearer " + bearer_token}
     )
     if response.status_code == 200:
-        holiday_dates = [holiday["data"] for holiday in response.json().get("data", [])]
+        all_holidays= response.json().get("data", [])
+        holiday_dates = []
+
+        for holiday in all_holidays:
+             if any(e["id_empresa"] == user_data["id_empresa"] for e in holiday["ferias_feriados_empresas"]) \
+                or any(est["id_estabelecimento"] == user_data["id_estabelecimento"] for est in holiday["ferias_feriados_estabelecimentos"]):
+                    holiday_dates.append(holiday["data"])
     else:
         print("Failed to fetch holidays data:", response.status_code)
 
@@ -56,8 +88,21 @@ def verify_and_extract_dates(dates: list, bearer_token: str) -> dict:
     )
     if response.status_code == 200:
         for period in response.json().get("data", []):
-            for day in period["ferias_periodos_proibidos_dias"]:
-                prohibited_dates.append(day["data"])
+            excecoes_user_ids = {e["id_user"] for e in period["ferias_periodos_proibidos_excecoes"]}
+        
+            
+            if user_data["id"] in excecoes_user_ids:
+                continue
+
+            if period["aplicado_toda_empresa"] == 1:
+                for day in period["ferias_periodos_proibidos_dias"]:
+                    prohibited_dates.append(day["data"])
+
+            else:
+                setor_ids = {s["id_setor"] for s in period["ferias_periodos_proibidos_setores"]}
+                if user_data["id_setor"] in setor_ids:
+                    for day in period["ferias_periodos_proibidos_dias"]:
+                        prohibited_dates.append(day["data"])
     else:
         print("Failed to fetch prohibited periods data:", response.status_code)
 
@@ -68,7 +113,6 @@ def verify_and_extract_dates(dates: list, bearer_token: str) -> dict:
     print("Dates to verify:", dates)
     allowed_dates = {}
     removed_dates = []
-    today_str = date.today().strftime("%Y-%m-%d")
 
     for date_str in dates:
         try:

@@ -23,6 +23,10 @@ coworker_system_prompt= '''
 
             5- The user can only request either vacation or absence days, not both at the same time.
 
+            6- The user may request half day or full day off.
+                
+                    - If the user requests a half day, ask for the start time (09:00:00) and inform them that the end time will be 4 hours later.
+
             5-Check for conflicts using the `verify_and_extract_dates` tool:
 
                 -Company holidays.
