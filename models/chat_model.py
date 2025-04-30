@@ -7,7 +7,7 @@ import json
 
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from prompts.system_prompts import coworker_system_prompt
 
@@ -20,6 +20,8 @@ from datetime import datetime
 
 from tools.extract_dates import verify_and_extract_dates
 from tools.add_request import add_request
+from tools.check_requests import check_requests
+
 
 
 
@@ -42,9 +44,9 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
         ]
     
     llm=ChatOpenAI(model="gpt-4o-mini")
-    llm_with_tools=llm.bind_tools([verify_and_extract_dates,add_request])
+    llm_with_tools=llm.bind_tools([verify_and_extract_dates,add_request,check_requests])
 
-    history = StreamlitChatMessageHistory(key="messages")
+    history = StreamlitChatMessageHistory(key="messages_book")
 
     chat_prompt=ChatPromptTemplate(
         [
@@ -83,7 +85,7 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
                 
                 tool_args = tool_call["args"]
                 tool_args["bearer_token"] = bearer_token
-                print(f"Invoking {tool_name} with args: {tool_args}")
+
                 tool_result = verify_and_extract_dates.invoke(tool_args)
 
                 print(f"Tool used : {tool_name}; Result: {tool_result}")
@@ -109,7 +111,6 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
                 tool_args["bearer_token"] = bearer_token
                 tool_args["files"] = uploaded_files
 
-                print(f"Invoking {tool_name} with args: {tool_args}")
                 tool_result = add_request.invoke(tool_args)
 
                 print(f"Tool used : {tool_name}; Result: {tool_result}")
@@ -126,6 +127,34 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
                 history.add_ai_message(second_response.content)
                 print(second_response)
                 return second_response.content
+            
+            elif tool_name=="check_requests":
+
+                tool_args = tool_call["args"]
+                
+                tool_args["bearer_token"] = bearer_token
+                tool_args["files"] = uploaded_files
+
+                tool_result = check_requests.invoke(tool_args)
+
+                print(f"Tool used : {tool_name}; Result: {tool_result}")
+                
+
+                second_response = chain.invoke({
+                        "input": f"A mensagem ao submeter pedido foi : {tool_result}. Por favor confirme se deseja agendar mais dias.",
+                        "filtered_absence_types": f"{filtered_absence_types}",
+                        "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
+                        "uploaded_files": f"{uploaded_files}",
+                        "history": history.messages,
+                    
+                    })
+
+                history.add_ai_message(second_response.content)
+                print(second_response)
+                return second_response.content
+
+            
+
             
 
 

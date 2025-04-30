@@ -17,11 +17,12 @@ def add_request(dates: list[dateClass], bearer_token: str, type_leave: str, id_t
     """
         
         Only use this tool when the user explicitly confirms the dates.
+        Use this after the user confirms the dates.
         Makes a request to book the dates in the HR system.
         
 
     Args:
-        dates (list): List of dictionaries, each with date, type_day(1=full day,0=half day),start_time(09:00:00).
+        dates (list): List of dictionaries, each with date, type_day(1=full day,0=half day),start_time.
         bearer_token (str): Bearer token for authentication.
         type_leave (str): Type of leave, either "vacation" or "absence".
         id_type_absence (int): ID of the absence type if applicable.

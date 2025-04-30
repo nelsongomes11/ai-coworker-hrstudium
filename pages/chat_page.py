@@ -13,7 +13,7 @@ def chat_page():
         
     """
 
-    st.title("Chat Page")
+    st.title("Marcar Férias e Ausências")
 
 
     if "is_logged" not in st.session_state:
@@ -84,13 +84,15 @@ def chat_page():
 
         # Initialize message history
 
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+        if "messages_book" not in st.session_state:
+            st.session_state.messages_book = []
 
 
-        for msg in st.session_state.messages:
+        for msg in st.session_state.messages_book:
             
-            st.chat_message(msg.type).write(msg.content)
+            if msg.type == "human" or msg.type == "ai":
+                st.chat_message(msg.type).write(msg.content)
+            
 
         if user_input:=st.chat_input("Escreva a sua mensagem..."):
 
