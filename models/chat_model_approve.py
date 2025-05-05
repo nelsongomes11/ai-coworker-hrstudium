@@ -29,7 +29,7 @@ from tools.request_decision import request_decision
 def get_chat_model_approve(bearer_token,user_input):
 
     
-    llm=ChatOpenAI(model="gpt-4o-mini")
+    llm=ChatOpenAI(model="gpt-4.1-mini")
     llm_with_tools=llm.bind_tools([check_requests_to_approve,request_decision])
 
     history = StreamlitChatMessageHistory(key="messages_approve")
@@ -78,7 +78,7 @@ def get_chat_model_approve(bearer_token,user_input):
             
 
                 second_response = chain.invoke({
-                        "input": f"Os pedidos para aprovação são: {tool_result}. Por favor confirme que dias deseja aprovar ou rejeitar",
+                        "input": f"Os pedidos para aprovação são: {tool_result}. É importante mostrar os IDs dos pedidos.",
                         "history": history.messages,
                     
                     })

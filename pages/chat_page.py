@@ -62,9 +62,16 @@ def chat_page():
             st.error("Failed to fetch user vacations data.")
 
 
+        col1, col2 = st.columns([2,1])
+
+
 
         with st.sidebar:
+            
             st.header("Olá, "+st.session_state.user["primeiro_nome"]+"!")
+
+            st.markdown("##")
+            
             st.write("Saldo de férias: "+str(int(st.session_state.vacations["horas_por_marcar"]/8)))
             st.write("Dias Totais: "+str(int(st.session_state.vacations["horas_totais"]/8)))
             st.write("Dias Aprovados: "+str(int(st.session_state.vacations["horas_aprovadas"]/8)))
@@ -77,6 +84,12 @@ def chat_page():
                 "Escolha um documento", accept_multiple_files=True
             )
 
+            st.markdown("##")
+
+            if st.button("Logout" ,type="primary"):
+                    for key in st.session_state.keys():
+                        del st.session_state[key]
+                    st.rerun()
 
 
 
@@ -92,19 +105,69 @@ def chat_page():
             
             if msg.type == "human" or msg.type == "ai":
                 st.chat_message(msg.type).write(msg.content)
+                
+
+        if st.session_state.messages_book==[]:
+
+            if st.button("Quero marcar férias."):
+                st.chat_message("human").write("Quero marcar férias.")
+
+
+                with st.spinner("A carregar..."):
+                    response_text=get_chat_model(
+                        st.session_state["access_token"],
+                        "Quero marcar férias.",
+                        uploaded_files
+                    )
+
+                st.chat_message("ai").write(response_text)
+                st.rerun()
+
+            if st.button("Quero marcar ausências."):
+                st.chat_message("human").write("Quero marcar ausências.")
+
+                with st.spinner("A carregar..."):
+                    response_text=get_chat_model(
+                        st.session_state["access_token"],
+                        "Quero marcar ausências.",
+                        uploaded_files
+                    )
+
+                
+                st.chat_message("ai").write(response_text)
+                st.rerun()
+
+            if st.button("Quero ver os meus pedidos marcados."):
+                st.chat_message("human").write("Quero ver os meus pedidos marcados.")
+
+                with st.spinner("A carregar..."):
+                    response_text=get_chat_model(
+                        st.session_state["access_token"],
+                        "Quero ver os meus pedidos marcados.",
+                        uploaded_files
+                    )
+
+                
+                st.chat_message("ai").write(response_text)
+                st.rerun()
             
 
         if user_input:=st.chat_input("Escreva a sua mensagem..."):
 
             st.chat_message("human").write(user_input)
 
-            response_text=get_chat_model(
-                st.session_state["access_token"],
-                user_input,
-                uploaded_files
-            )
+
+            with st.spinner("A carregar..."):
+                response_text=get_chat_model(
+                    st.session_state["access_token"],
+                    user_input,
+                    uploaded_files
+                )
 
             st.chat_message("ai").write(response_text)
+            st.rerun()
+
+        
         
         
     

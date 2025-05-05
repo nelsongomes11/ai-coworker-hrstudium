@@ -42,6 +42,21 @@ def approve_page():
         else:
             st.error("Failed to fetch user data.")
 
+        
+
+        with st.sidebar:
+            
+            st.header("Olá, "+st.session_state.user["primeiro_nome"]+"!")
+
+            st.markdown("##")
+            st.markdown("##")
+            st.markdown("##")
+            
+            if st.button("Logout",type="primary"):
+                    for key in st.session_state.keys():
+                        del st.session_state[key]
+                    st.rerun()
+
 
 
 
@@ -57,6 +72,35 @@ def approve_page():
             
             st.chat_message(msg.type).write(msg.content)
 
+        if st.session_state.messages_approve == []:
+            if st.button("Que pedidos de férias tenho para aprovar ?"):
+                    st.chat_message("human").write("Que pedidos de férias tenho para aprovar ?")
+
+
+                    with st.spinner("A carregar..."):
+                        response_text=get_chat_model_approve(
+                            st.session_state["access_token"],
+                            "Que pedidos de férias tenho para aprovar ?",
+
+                        )
+
+                    st.chat_message("ai").write(response_text)
+                    st.rerun()
+
+            if st.button("Que pedidos de ausências tenho para aprovar ?"):
+                    st.chat_message("human").write("Que pedidos de ausências tenho para aprovar ?")
+
+
+                    with st.spinner("A carregar..."):
+                        response_text=get_chat_model_approve(
+                            st.session_state["access_token"],
+                            "Que pedidos de ausências tenho para aprovar ?",
+
+                        )
+
+                    st.chat_message("ai").write(response_text)
+                    st.rerun()
+
         if user_input:=st.chat_input("Escreva a sua mensagem..."):
 
             st.chat_message("human").write(user_input)
@@ -68,6 +112,7 @@ def approve_page():
             )
 
             st.chat_message("ai").write(response_text)
+            st.rerun()
         
         
     

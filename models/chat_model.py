@@ -43,7 +43,7 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
             for item in absence_types if item.get("active") == 1
         ]
     
-    llm=ChatOpenAI(model="gpt-4o-mini")
+    llm=ChatOpenAI(model="gpt-4.1-mini")
     llm_with_tools=llm.bind_tools([verify_and_extract_dates,add_request,check_requests])
 
     history = StreamlitChatMessageHistory(key="messages_book")
@@ -141,7 +141,7 @@ def get_chat_model(bearer_token,user_input,uploaded_files):
                 
 
                 second_response = chain.invoke({
-                        "input": f"A mensagem ao submeter pedido foi : {tool_result}. Por favor confirme se deseja agendar mais dias.",
+                        "input": f"Aqui estão os dias marcados: {tool_result}. Mostra os pedidos ao user.",
                         "filtered_absence_types": f"{filtered_absence_types}",
                         "date": f"{datetime.now().strftime('%Y-%m-%d')}, {datetime.now().strftime('%A')}",
                         "uploaded_files": f"{uploaded_files}",
