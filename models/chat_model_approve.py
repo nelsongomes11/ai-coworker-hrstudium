@@ -78,7 +78,7 @@ def get_chat_model_approve(bearer_token,user_input):
             
 
                 second_response = chain.invoke({
-                        "input": f"Os pedidos para aprovação são: {tool_result}. É importante mostrar os IDs dos pedidos.",
+                        "input": f"Os pedidos para aprovação são: {tool_result}. É importante mostrar os IDs dos pedidos. Se existirem datas, mostra tudo em formato de tabela.",
                         "history": history.messages,
                     
                     })

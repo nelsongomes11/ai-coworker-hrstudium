@@ -48,4 +48,4 @@ def check_requests(bearer_token: str, type_requests: str) -> str:
     elif type_requests == "ausencias":
      return f"Absence requests:{requested_dates_absences}"
     elif type_requests == "both":
-        return f"Vacations and Absences requests:{requested_dates_vacations}, {requested_dates_absences}"
+        return f"Vacations: {requested_dates_vacations}" f"Absences:{requested_dates_absences}"
